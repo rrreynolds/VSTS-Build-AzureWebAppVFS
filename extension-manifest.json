@@ -1,10 +1,10 @@
 {
   "manifestVersion": 1,
-  "id": "GeertvanderCruijsen-Vsts-Release-AzureWebAppVFS",
-  "name": "Azure WebApp Virtual File System Tasks",
+  "id": "Beaufort-Vsts-Release-AzureWebAppVFS",
+  "name": "Azure WebApp Virtual File System Tasks (BEAUFORT PATCHED)",
   "version": "2.0.0",
-  "publisher": "geertvdcruijsen",
-  "public": true,
+  "publisher": "BEAU",
+  "public": false,
   "targets": [
     {
       "id": "Microsoft.VisualStudio.Services"

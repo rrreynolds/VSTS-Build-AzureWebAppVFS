@@ -1,7 +1,7 @@
 {
-    "id": "25104ad4-8a3e-4543-9405-419adbe1b2fd",
-    "name": "WebAppVFSDelete",
-    "friendlyName": "Delete Item from Azure Web App",
+    "id": "25104ad4-8a3e-4543-9405-419adbe1b2fe",
+    "name": "WebAppVFSDelete-BEAU",
+    "friendlyName": "Delete Item from Azure Web App (Beaufort patched)",
     "description": "Delete Item from Azure Web App through Kudu VFS Rest API",
     "helpMarkDown": "Version: 2.0. [More Information](https://github.com/Geertvdc/VSTS-Build-AzureWebAppVFS)",
     "category": "Utility",
@@ -43,6 +43,38 @@
                 "EditableOptions": "True"
             },
             "helpMarkDown": "Enter or Select the name of an existing Azure App Service."
+        },
+        {
+            "name": "DeployToSlotFlag",
+            "type": "boolean",
+            "label": "Deploy to slot",
+            "defaultValue": "false",
+            "required": false,
+            "helpMarkDown": "Select the option to deploy to an existing slot other than the Production slot. If this option is not selected, then the Azure App Service will be deployed to the Production slot."
+        },
+        {
+            "name": "ResourceGroupName",
+            "type": "pickList",
+            "label": "Resource group",
+            "defaultValue": "",
+            "required": true,
+            "properties": {
+                "EditableOptions": "True"
+            },
+            "helpMarkDown": "Enter or Select the Azure Resource group that contains the Azure App Service specified above.",
+            "visibleRule": "DeployToSlotFlag = true"
+        },
+        {
+            "name": "SlotName",
+            "type": "pickList",
+            "label": "Slot",
+            "defaultValue": "",
+            "required": true,
+            "properties": {
+                "EditableOptions": "True"
+            },
+            "helpMarkDown": "Enter or Select an existing Slot other than the Production slot.",
+            "visibleRule": "DeployToSlotFlag = true"
         },
         {
             "name": "filePath",
@@ -94,6 +126,24 @@
             "target": "WebAppName",
             "endpointId": "$(ConnectedServiceName)",
             "dataSourceName": "AzureRMWebAppNames"
+        },
+        {
+            "target": "ResourceGroupName",
+            "endpointId": "$(ConnectedServiceName)",
+            "dataSourceName": "AzureRMWebAppResourceGroup",
+            "parameters": {
+                "WebAppName": "$(WebAppName)"
+            }
+        },
+        {
+            "target": "SlotName",
+            "endpointId": "$(ConnectedServiceName)",
+            "dataSourceName": "AzureRMWebAppSlotsId",
+            "parameters": {
+                "WebAppName": "$(WebAppName)",
+                "ResourceGroupName": "$(ResourceGroupName)"
+            },
+            "resultTemplate": "{\"Value\":\"{{{ #extractResource slots}}}\",\"DisplayValue\":\"{{{ #extractResource slots}}}\"}"
         }
     ],
     "instanceNameFormat": "Delete file from Azure Web App",

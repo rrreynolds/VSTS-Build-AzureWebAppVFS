@@ -2,6 +2,8 @@ Trace-VstsEnteringInvocation $MyInvocation
 
 $ConnectedServiceName = Get-VstsInput -Name ConnectedServiceName -Require
 $WebAppName = Get-VstsInput -Name WebAppName -Require
+$ResourceGroupName = Get-VstsInput -Name ResourceGroupName
+$SlotName = Get-VstsInput -Name SlotName
 $filePath = Get-VstsInput -Name filePath -Require
 $deleteRecursive = Get-VstsInput -Name deleteRecursive 
 $allowUnsafe = Get-VstsInput -Name allowUnsafe
@@ -17,14 +19,23 @@ Write-Output "Azure Initialized"
 Import-Module $PSScriptRoot\vfs
 Write-Output "VFS scripts Initialized"
 
-$webapp = Get-AzureRmWebApp -name "$WebAppName"
-$resourceGroup = $webapp.ResourceGroup
+if ([string]::IsNullOrWhiteSpace($ResourceGroupName)) {
+	$webapp = Get-AzureRmWebApp -name "$WebAppName"
+	$ResourceGroupName = $webapp.ResourceGroup
+}
+
 
 Write-Output "Retrieved web app: $webapp in Resource group: $resourceGroup"
 Write-Output "Retrieving publishing profile"
-$login = Get-AzureRmWebAppPublishingCredentials "$resourceGroup" "$WebAppName"
+if ([string]::IsNullOrWhiteSpace($SlotName)) {
+	$login = Get-AzureRmWebAppPublishingCredentials "$ResourceGroupName" "$WebAppName" 
+}
+else {
+	$login = Get-AzureRmWebAppPublishingCredentials "$ResourceGroupName" "$WebAppName" "$SlotName"
+}
 Write-Output "Publishing profile retrieved"
 
+$username = $login.Properties.PublishingUserName
 $pw = $login.Properties.PublishingPassword
 
 if($allowUnsafe -eq $true){
@@ -42,5 +53,4 @@ if($allowUnsafe -eq $true){
 		[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 }
 
-
-Remove-FileFromWebApp -webAppName "$WebAppName" -username $login.Properties.PublishingUserName -password $pw -filePath "$filePath" -allowUnsafe $allowUnsafe -alternativeUrl $alternativeKuduUrl -continueIfFileNotExist $continueIfFileNotExist -deleteRecursive $deleteRecursive
+Remove-FileFromWebApp -webAppName "$WebAppName" -slotName "$SlotName" -username "$username" -password "$pw" -filePath "$filePath" -allowUnsafe $allowUnsafe -alternativeUrl $alternativeKuduUrl -continueIfFileNotExist $continueIfFileNotExist -deleteRecursive $deleteRecursive
